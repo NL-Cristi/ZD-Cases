@@ -2,28 +2,32 @@
 <html>
 
 <head>
-    <title>ZendeskOpen</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            width: 200px;
-            padding: 10px;
+        .container {
+            padding: 20px;
+            text-align: center;
         }
 
         button {
-            margin-top: 10px;
-            width: 100%;
-            padding: 5px;
+            padding: 10px;
+            width: 55px;
         }
     </style>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
 </head>
 
 <body>
-    <h3>ZendeskOpen</h3>
-    <input type="text" id="zendeskUrl" placeholder="Enter Zendesk URL">
-    <button id="setZendeskDomain">Set Zendesk Domain</button>
-    <button id="openZendesk">Open Zendesk</button>
-    <button id="resetZendeskDomain">Reset</button>
+    <div class="container">
+        <button id="openCaseButton" hidden="true"><i class="fa-brands fa-chrome fa-flip-both fa-2xl"
+                style="color: #74C0FC;"></i></button>
+        <button id="getCaseIDButton"><i class="fa-solid fa-magnifying-glass fa-2xl"></i></button>
+        <button id="openZDCaseButton"><i class="fa-solid fa-up-right-from-square fa-2xl"></i></button>
+
+        <button id="settingsButton"><i class="fa-solid fa-gears fa-flip-vertical fa-2xl"
+                style="color: #FFD43B;"></i></button>
+
+    </div>
+
     <script src="popup.js"></script>
 </body>
 

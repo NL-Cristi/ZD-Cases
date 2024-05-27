@@ -1,13 +1,23 @@
 {
     "manifest_version": 2,
-    "name": "Thunderbird Settings Extension",
+    "name": "Test-ZD",
     "version": "1.0",
-    "description": "An extension to add a Settings button with a popup",
+    "description": "Extension to manage mails/cases from ZD",
     "applications": {
         "gecko": {
-            "id": "settings-extension@example.com"
+            "id": "TestMyFolderManager@clamsen.com",
+            "strict_min_version": "68.0"
         }
     },
+    "permissions": [
+        "storage",
+        "tabs",
+        "activeTab",
+        "messagesRead",
+        "messagesMove",
+        "accountsRead",
+        "accountsFolders"
+    ],
     "background": {
         "scripts": [
             "background.js"
@@ -15,9 +25,15 @@
     },
     "browser_action": {
         "default_popup": "popup.html",
-        "default_title": "Settings"
+        "default_icon": {
+            "16": "icons/icon-16.png",
+            "48": "icons/icon-48.png",
+            "128": "icons/icon-128.png"
+        }
     },
-    "permissions": [
-        "storage"
-    ]
+    "icons": {
+        "16": "icons/icon-16.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
+    }
 }
