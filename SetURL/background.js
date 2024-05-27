@@ -1,4 +1,10 @@
-console.log("Background script loaded");  // Log when the background script is loaded
+console.log("Background script loaded");
+let myImapAccount;
+let monitorFolder;
+var openedSyncFolder;
+let closedSyncFolder;
+let monitorOpenClosedFolders;
+populateDefaults();
 
 browser.browserAction.onClicked.addListener(() => {
     console.log("Browser action clicked");
@@ -13,11 +19,24 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             OpenGoogle();
             sendResponse({ success: true });
             break;
-        case "greet":
-            console.log("Received message to backround:", message);
+        case "createCaseFolder":
+            console.log("Received createCaseFolder message in background:", message);
+            if (message.folderName) {
+                console.log("Folder name:", message.folderName);
+                // Add your folder creation logic here
+                sendResponse({ success: true, folderName: message.folderName });
+            } else {
+                console.error("No folder name provided.");
+                sendResponse({ success: false, error: "No folder name provided." });
+            }
+            console.log("LogAfter createCaseFolder in background");
+            break;
 
-            sendResponse({ response: "Hello from the background script!" });
-            console.log("LogAfter sendMessage in backround");
+        case "closeCaseFolder":
+            console.log("Received closeCaseFolder message to backround:", message);
+
+            sendResponse({ response: "Hello from the closeCaseFolder background script!" });
+            console.log("LogAfter closeCaseFolder sendMessage in backround");
             break;
         case "openZDCase":
             console.log("Opening Zendesk case");
@@ -115,3 +134,77 @@ function caseUrl(zendeskDomain, subject) {
     const ticketId = extractTicketID(subject);
     return ticketId ? `https://${zendeskDomain}.zendesk.com/agent/tickets/${ticketId}` : null;
 }
+
+async function populateDefaults() {
+    let myAccounts = await browser.accounts.list();
+
+    // Find the IMAP account AND id = account1 at the same time
+    let myImapAccount = myAccounts.filter(account => account.type === "imap" && account.id === "account1");
+
+    // Error out if no IMAP account is found
+    if (myImapAccount.length === 0) {
+        console.error("No IMAP account found");
+        return;
+    } else {
+        console.info("IMAP account1 found");
+    }
+
+    // Find the "MyFolders" folder
+    for (let account of myImapAccount) {
+        for (let folder of account.folders) {
+            if (folder.name === "MyFolders") {
+                monitorFolder = folder;
+                console.info("MyFolders FOUND");
+                break;
+            }
+        }
+        if (monitorFolder) break;
+    }
+
+    if (!monitorFolder) {
+        console.error("MyFolders not found");
+        return;
+    }
+
+    try {
+        // Get subfolders of monitorFolder
+        let monitorOpenClosedFolders = await browser.folders.getSubFolders(monitorFolder);
+
+        // Check if the array contains an object with the name "Open"
+        let containsOpen = monitorOpenClosedFolders.some(folder => folder.name === "Open");
+
+        // Check if the array contains an object with the name "Closed"
+        let containsClosed = monitorOpenClosedFolders.some(folder => folder.name === "Closed");
+
+        if (containsOpen && containsClosed) {
+            console.log("The array contains objects with the names 'Open' and 'Closed'.");
+        } else {
+            if (!containsOpen) {
+                // Create the "Open" folder
+                let newOpenFolder = await browser.folders.create(monitorFolder, "Open");
+                openedSyncFolder.push(newOpenFolder);
+                console.log("New subfolder 'Open' created:", newOpenFolder);
+            }
+
+            if (!containsClosed) {
+                // Create the "Closed" folder
+                let newClosedFolder = await browser.folders.create(monitorFolder, "Closed");
+                openedSyncFolder.push(newClosedFolder);
+                console.log("New subfolder 'Closed' created:", newClosedFolder);
+            }
+        }
+    } catch (error) {
+        console.error("Error processing subfolders or creating new folder:", error);
+    }
+}
+
+// Function to output the current time to the console every 5 minutes
+function runEvery5Minutes() {
+    setInterval(() => {
+        let currentTime = new Date().toLocaleTimeString();
+        console.log("Current time:", currentTime);
+    }, 60000); // 5 minutes in milliseconds
+}
+
+// Start the interval
+runEvery5Minutes();
