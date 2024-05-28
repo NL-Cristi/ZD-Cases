@@ -10,16 +10,6 @@ document.getElementById('settingsButton').addEventListener('click', function () 
     });
 });
 
-// // Create folder functionality with dialog
-// document.getElementById('createCaseFolderButton').addEventListener('click', function () {
-//     // Open the create folder dialog
-//     browser.windows.create({
-//         url: "createFolder.html",
-//         type: "popup",
-//         width: 400,
-//         height: 200
-//     });
-// });
 
 // Listen for the message from the popup
 window.addEventListener('message', function (event) {
@@ -40,7 +30,36 @@ document.getElementById('openCaseButton').addEventListener('click', function () 
 });
 
 document.getElementById('closeCaseFolderButton').addEventListener('click', function () {
-    browser.runtime.sendMessage({ action: "closeCaseFolder" });
+    browser.runtime.sendMessage({ action: "closeCaseFolder" }, (response) => {
+        if (browser.runtime.lastError) {
+            console.error("Error retrieving case ID: ", browser.runtime.lastError);
+            return;
+        }
+        if (response.error) {
+            console.error("Error: ", response.error);
+            window.alert(response.error);
+
+        } else {
+            console.info(response.folderName + " archived successfully");
+            window.alert(response.folderName + " archived successfully");
+        }
+    });
+});
+document.getElementById('syncFolderButton').addEventListener('click', function () {
+    browser.runtime.sendMessage({ action: "syncFolderMails" }, (response) => {
+        if (browser.runtime.lastError) {
+            console.error("Error retrieving case ID: ", browser.runtime.lastError);
+            return;
+        }
+        if (response.error) {
+            console.error("Error: ", response.error);
+            window.alert(response.error);
+
+        } else {
+            console.info("Moved " + response.messagesCount + " mails to the folder");
+            window.alert("Moved " + response.messagesCount + " mails to the folder");
+        }
+    });
 });
 
 document.getElementById('getCaseIDButton').addEventListener('click', function () {
@@ -82,6 +101,22 @@ document.getElementById('openZDCaseButton').addEventListener('click', function (
     }).catch(error => {
         console.error("Error accessing storage: ", error);
         window.alert("Error accessing storage: " + error.message);
+    });
+});
+document.getElementById('restoreArchiveButton').addEventListener('click', function () {
+    browser.runtime.sendMessage({ action: "restoreArchivedFolder" }, (response) => {
+        if (browser.runtime.lastError) {
+            console.error("Error retrieving case ID: ", browser.runtime.lastError);
+            return;
+        }
+        if (response.error) {
+            console.error("Error: ", response.error);
+            window.alert(response.error);
+
+        } else {
+            console.info(response.folderName + " reOpened successfully");
+            window.alert(response.folderName + " reOpened successfully");
+        }
     });
 });
 const showBtn = document.getElementById("create-folder-show-dialog");
