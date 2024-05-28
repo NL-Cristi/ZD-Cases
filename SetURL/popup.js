@@ -1,5 +1,14 @@
 console.log("PopUp script loaded");  // Log when the popup script is loaded
 
+// Hide the openZDCaseButton if zendeskDomain is not present in local storage
+browser.storage.local.get('zendeskDomain').then(data => {
+    if (!data.zendeskDomain) {
+        document.getElementById('openZDCaseButton').style.display = 'none';
+    }
+}).catch(error => {
+    console.error("Error accessing storage: ", error);
+});
+
 // Open settings popup
 document.getElementById('settingsButton').addEventListener('click', function () {
     browser.windows.create({
@@ -9,7 +18,6 @@ document.getElementById('settingsButton').addEventListener('click', function () 
         height: 200
     });
 });
-
 
 // Listen for the message from the popup
 window.addEventListener('message', function (event) {
@@ -45,6 +53,7 @@ document.getElementById('closeCaseFolderButton').addEventListener('click', funct
         }
     });
 });
+
 document.getElementById('syncFolderButton').addEventListener('click', function () {
     browser.runtime.sendMessage({ action: "syncFolderMails" }, (response) => {
         if (browser.runtime.lastError) {
@@ -103,6 +112,7 @@ document.getElementById('openZDCaseButton').addEventListener('click', function (
         window.alert("Error accessing storage: " + error.message);
     });
 });
+
 document.getElementById('restoreArchiveButton').addEventListener('click', function () {
     browser.runtime.sendMessage({ action: "restoreArchivedFolder" }, (response) => {
         if (browser.runtime.lastError) {
@@ -119,6 +129,7 @@ document.getElementById('restoreArchiveButton').addEventListener('click', functi
         }
     });
 });
+
 const showBtn = document.getElementById("create-folder-show-dialog");
 const dialog = document.getElementById("folder-dialog");
 const jsSaveBtn = dialog.querySelector("#save");
@@ -141,15 +152,6 @@ jsSaveBtn.addEventListener("click", (e) => {
 jsCancelBtn.addEventListener("click", (e) => {
     dialog.close();
 });
-// form.addEventListener("submit", (e) => {
-//     e.preventDefault();
-//     console.log(folderInput.value);
-//     console.log("Folder name received:", folderName);
-//     browser.runtime.sendMessage({ action: "createCaseFolder", folderName: folderInput.value });
-
-//     dialog.close();
-// });
-
 cancelBtn.addEventListener("click", () => {
     dialog.close();
 });
